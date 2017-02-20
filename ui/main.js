@@ -1,6 +1,6 @@
 console.log('Loaded!');
 
-var img=document.getElementById("madi");
+var img=document.getElementById("kk");
 
 var marginleft = 0;
 function Setinterval(){
