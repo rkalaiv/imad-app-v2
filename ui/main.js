@@ -1,6 +1,5 @@
 console.log('Loaded!');
-var element=document.getElementById("main-text");
-element.innerHTML="changed main content next time";
+
 var img=document.getElementById("madi");
 
 var marginleft = 0;
@@ -14,4 +13,5 @@ img.onclick = function() {
     var interval = setinterval(moveright, 100);
     };
 
-    
+    var element=document.getElementById("main-text");
+element.innerHTML="changed main content next time";
