@@ -2,8 +2,16 @@ console.log('Loaded!');
 var element=document.getElementById("main-text");
 element.innerHTML="changed main content next time";
 var img=document.getElementById("madi");
+
+var marginleft = 0;
+function Setinterval(){
+    marginleft=marginleft+10;
+    img.style.marginleft= marginleft + "px";
+}
+
 img.onclick = function() {
-    img.style.marginleft="100 px";
+    //img.style.marginleft="100 px";
+    var interval = setinterval(moveright, 100);
     };
 
     
