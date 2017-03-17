@@ -54,7 +54,7 @@ var nameInput=document.getElementById("name");
 var name=nameInput.value;
 nameInput.value="";
 
-request.open("GET","http://localhost:8080/submit-name?name="+name,true);
+request.open("GET","http://rkalaiv.imad.hasura-app.io/submit-name?name="+name,true);
 request.send(null);
 
 
