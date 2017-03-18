@@ -213,7 +213,7 @@ app.get('/ui/madi.png', function (req, res) {
 });
 
 app.get('/ui/doll.png', function (req, res) {
-  res.sendFile(path.join(__dirname, 'ui', 'doll.png'));
+  res.sendFile(path.join(__dirname, 'ui', 'Small_Peach_2.png'));
 });
 
 
