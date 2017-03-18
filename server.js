@@ -1,51 +1,22 @@
 var express = require('express');
 var morgan = require('morgan');
 var path = require('path');
+var Pool=require('pg').Pool;
+var crypto = require('crypto');
+var bodyParser=require('body-parser');
+
+
+var config={
+user:'rkalaiv',
+database:'rkalaiv',
+host:'db.imad.hasura-app.io',
+port:'5432',
+password:'db-rkalaiv-92670'
+};
 
 var app = express();
 app.use(morgan('combined'));
-
-var articles = {
-    'article-one' : {
-        title : 'Article One | Kalai',
-        heading: 'Article One',
-        date: 'Feb 19, 2017',
-        content: `
-            <p>
-                Content of article one. Content of article one
-                Content of article one.Content of article one.Content of article one. Content of article one
-            </p>
-            <p>
-                Content of article one. Content of article one
-                Content of article one.Content of article one.Content of article one. Content of article one
-            </p>
-            <p>
-                Content of article one. Content of article one
-                Content of article one.Content of article one.Content of article one. Content of article one
-            </p>`
-       
-    },
-    'article-two' :{
-         title : 'Article Two | Kalai',
-        heading: 'Article Two',
-        date: 'Feb 25, 2017',
-        content: `
-            <p>
-                Content of article two here.
-            </p>`
-       
-    },
-    'article-three' :{
-         title : 'Article Three | Kalai',
-        heading: 'Article Three',
-        date: 'Feb 26, 2017',
-        content: `
-            <p>
-                Content of article three.
-            </p>`
-       
-    }
-};
+app.use(bodyParser.json());
 
 function CreateTemplate(data) {
 
@@ -70,7 +41,7 @@ var htmltemplate = `
         </div>
         <hr>
         <h2> ${heading}</h2>
-        <div> ${date} </div>
+        <div> ${date.toDateString()} </div>
         <div>
             ${content}
         </div>    
@@ -85,6 +56,67 @@ return htmltemplate;
 
 app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, 'ui', 'index.html'));
+});
+
+function hash(input,salt){
+
+	var hashed= crypto.pbkdf2Sync(input, salt, 100000, 512, 'sha512');
+	return ['pbkdf2','100000',salt,hashed.toString('hex')].join('$');
+
+
+}
+
+
+
+app.get('/hash/:input',function(req,res){
+
+	var hashedString=hash(req.params.input,'this-is-the-random-string');
+	res.send(hashedString);
+
+});
+
+
+app.post('/create-user',function(req,res){
+
+
+var username=req.body.username;
+var password=req.body.password;
+
+var salt=crypto.randomBytes(128).toString('hex');
+var dbstring=hash(password,salt);
+pool.query("INSERT INTO 'user' (username,password) VALUES ($1,$2)",[username,dbstring],function(err,result){
+
+if(err){
+res.status(500).send(err.toString());
+}else
+{
+res.send("User successfully created " +username);
+}
+
+
+
+
+});
+
+});
+
+
+
+var pool=new Pool(config);
+app.get('/test-db',function(req,res) {
+
+pool.query('SELECT * FROM test',function(err,result){
+if(err){
+res.status(500).send(err.toString());
+}else
+{
+res.send(JSON.stringify(result.rows));
+}
+
+
+
+});
+
 });
 
 
@@ -107,9 +139,24 @@ res.send(JSON.stringify(names));
 
 
 
-app.get('/:articlename', function (req, res) {
+app.get('/articles/:articlename', function (req, res) {
     var articlename=req.params.articlename;
-  res.send(CreateTemplate (articles[articlename]));
+
+pool.query("SELECT * FROM article where tittle=$1",[req.params.articlename],function(err,result){
+	if(err){
+			res.status(500).send(err.toString());
+		}else{
+			if (result.rows.length==0){
+				res.status(404).send("Article Not Found");
+			}else{
+				var articlesData=result.rows[0];
+				  res.send(CreateTemplate (articlesData));
+			     }
+
+		      }
+
+});
+
 });
 
 
